@@ -47,6 +47,8 @@ namespace M2MqttUnity
         public int brokerPort = 1883;
         [Tooltip("Use encrypted connection")]
         public bool isEncrypted = false;
+        [Tooltip("Name of the certificate with extension e.g. client.pem. StreamingAssets or accessible folder")]
+        public string certificateName;
         [Header("Connection parameters")]
         [Tooltip("Connection to the broker is delayed by the the given milliseconds")]
         public int connectionDelay = 500;
@@ -276,10 +278,18 @@ namespace M2MqttUnity
                 try
                 {
 #if (!UNITY_EDITOR && UNITY_WSA_10_0 && !ENABLE_IL2CPP)
-                    client = new MqttClient(brokerAddress,brokerPort,isEncrypted, isEncrypted ? MqttSslProtocols.SSLv3 : MqttSslProtocols.None);
+                    client = new MqttClient(brokerAddress,brokerPort,isEncrypted, isEncrypted ? MqttSslProtocols.TLSv1_2 : MqttSslProtocols.None); //changed from SSL to TLS 1.2 
 #else
-                    client = new MqttClient(brokerAddress, brokerPort, isEncrypted, null, null, isEncrypted ? MqttSslProtocols.SSLv3 : MqttSslProtocols.None);
+                    client = new MqttClient(brokerAddress, brokerPort, isEncrypted, null, null, isEncrypted ? MqttSslProtocols.TLSv1_2 : MqttSslProtocols.None); //changed from SSL to TLS 1.2 
+
+                    //Certificates
+                        //Version A
                     //System.Security.Cryptography.X509Certificates.X509Certificate cert = new System.Security.Cryptography.X509Certificates.X509Certificate();
+                    //cert.Import(certificate.bytes); //This takes a TextAsset (certificate) as byte
+                        //Version B (CreateFromCertFile or CreateFromSignedFile)
+                    //var cert_file= System.IO.Path.Combine(Application.streamingAssetsPath, certificateName);
+                    //var cert = System.Security.Cryptography.X509Certificates.X509Certificate2.CreateFromCertFile(cert_file);
+
                     //client = new MqttClient(brokerAddress, brokerPort, isEncrypted, cert, null, MqttSslProtocols.TLSv1_0, MyRemoteCertificateValidationCallback);
 #endif
                 }
